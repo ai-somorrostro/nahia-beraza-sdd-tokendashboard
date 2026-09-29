@@ -26,6 +26,9 @@
   var filterOutmodEl = document.getElementById("filter-outmod");
   var filtersClearEl = document.getElementById("filters-clear");
   var emptyEl = document.getElementById("empty");
+  var chartsSectionEl = document.getElementById("charts");
+  var pricesSvg = document.getElementById("prices-svg");
+  var usageSvg = document.getElementById("usage-svg");
 
   function rangeSuffix() {
     return state.range === "day" ? "Day" : "Week";
@@ -104,6 +107,95 @@
     });
   }
 
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var PRICE_MAX = 0.65; // $/1M common scale; DeepSeek-R1 is drawn capped + labelled
+  var CHART_TRACK_X = 160;
+  var CHART_TRACK_W = 250;
+  var CHART_ROW_H = 36;
+  var CHART_TOP = 8;
+
+  function svgEl(tag, attrs, text) {
+    var el = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs).forEach(function (key) {
+      el.setAttribute(key, attrs[key]);
+    });
+    if (text !== undefined && text !== null) {
+      el.textContent = text;
+    }
+    return el;
+  }
+
+  function clearSvg(svg) {
+    Array.prototype.slice.call(svg.childNodes).forEach(function (node) {
+      if (node.tagName && node.tagName.toLowerCase() !== "title") {
+        svg.removeChild(node);
+      }
+    });
+  }
+
+  function chartEmpty(figId, show) {
+    var fig = document.getElementById(figId);
+    var msg = fig.querySelector(".chart-empty");
+    if (msg) {
+      msg.hidden = !show;
+    }
+  }
+
+  function renderPrices(rows) {
+    clearSvg(pricesSvg);
+    pricesSvg.setAttribute("viewBox", "0 0 560 " + (CHART_TOP * 2 + Math.max(rows.length, 1) * CHART_ROW_H));
+    chartEmpty("chart-precios", rows.length === 0);
+    rows.forEach(function (row, i) {
+      var y = CHART_TOP + i * CHART_ROW_H;
+      pricesSvg.appendChild(svgEl("text", { x: 0, y: y + 14, "class": "chart-label" }, row.values.name));
+      var inW = Math.min(row.values.inPer1M, PRICE_MAX) / PRICE_MAX * CHART_TRACK_W;
+      var inBar = svgEl("rect", {
+        x: CHART_TRACK_X, y: y, width: Math.max(inW, 2), height: 9,
+        "class": "bar-in" + (row.values.inPer1M > PRICE_MAX ? " capped" : "")
+      });
+      pricesSvg.appendChild(inBar);
+      pricesSvg.appendChild(svgEl("text", { x: CHART_TRACK_X + Math.max(inW, 2) + 6, y: y + 8, "class": "chart-value" }, formatMoney(row.values.inPer1M)));
+      var outW = Math.min(row.values.outPer1M, PRICE_MAX) / PRICE_MAX * CHART_TRACK_W;
+      var outBar = svgEl("rect", {
+        x: CHART_TRACK_X, y: y + 12, width: Math.max(outW, 2), height: 9,
+        "class": "bar-out" + (row.values.outPer1M > PRICE_MAX ? " capped" : "")
+      });
+      pricesSvg.appendChild(outBar);
+      pricesSvg.appendChild(svgEl("text", { x: CHART_TRACK_X + Math.max(outW, 2) + 6, y: y + 20, "class": "chart-value" }, formatMoney(row.values.outPer1M)));
+    });
+  }
+
+  function renderUsage(rows) {
+    clearSvg(usageSvg);
+    usageSvg.setAttribute("viewBox", "0 0 560 " + (CHART_TOP * 2 + Math.max(rows.length, 1) * CHART_ROW_H));
+    chartEmpty("chart-consumo", rows.length === 0);
+    var maxU = 1;
+    rows.forEach(function (row) {
+      var day = row.model.inputTokensDay + row.model.outputTokensDay;
+      var week = row.model.inputTokensWeek + row.model.outputTokensWeek;
+      if (day > maxU) { maxU = day; }
+      if (week > maxU) { maxU = week; }
+    });
+    rows.forEach(function (row, i) {
+      var y = CHART_TOP + i * CHART_ROW_H;
+      var day = row.model.inputTokensDay + row.model.outputTokensDay;
+      var week = row.model.inputTokensWeek + row.model.outputTokensWeek;
+      usageSvg.appendChild(svgEl("text", { x: 0, y: y + 14, "class": "chart-label" }, row.values.name));
+      var dayW = Math.max(day / maxU * CHART_TRACK_W, 2);
+      usageSvg.appendChild(svgEl("rect", {
+        x: CHART_TRACK_X, y: y, width: dayW, height: 9,
+        "class": "bar-day" + (state.range === "day" ? " active" : " inactive")
+      }));
+      usageSvg.appendChild(svgEl("text", { x: CHART_TRACK_X + dayW + 6, y: y + 8, "class": "chart-value" }, formatTokens(day)));
+      var weekW = Math.max(week / maxU * CHART_TRACK_W, 2);
+      usageSvg.appendChild(svgEl("rect", {
+        x: CHART_TRACK_X, y: y + 12, width: weekW, height: 9,
+        "class": "bar-week" + (state.range === "week" ? " active" : " inactive")
+      }));
+      usageSvg.appendChild(svgEl("text", { x: CHART_TRACK_X + weekW + 6, y: y + 20, "class": "chart-value" }, formatTokens(week)));
+    });
+  }
+
   function cell(text, numeric) {
     var td = document.createElement("td");
     td.textContent = text;
@@ -149,6 +241,8 @@
     totalsTokensEl.textContent = formatTokens(totalTokens);
     totalsCostEl.textContent = formatMoney(totalCost);
     emptyEl.hidden = rows.length !== 0;
+    renderPrices(rows);
+    renderUsage(rows);
 
     var label = rangeSuffix();
     tokensRangeLabel.textContent = label;
@@ -175,6 +269,7 @@
     statusEl.textContent = "";
     statusEl.className = "status";
     emptyEl.hidden = true;
+    chartsSectionEl.hidden = false;
     tableEl.hidden = false;
     totalsRow.hidden = false;
   }
@@ -187,6 +282,7 @@
     statusEl.textContent = message;
     statusEl.className = "status error";
     emptyEl.hidden = true;
+    chartsSectionEl.hidden = true;
     tableEl.hidden = true;
     totalsRow.hidden = true;
   }

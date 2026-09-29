@@ -37,6 +37,19 @@
     <p id="status" class="status" role="status">Loading model data…</p>
     <p id="empty" class="status" role="status" hidden>No models match the current filters.</p>
 
+    <section id="charts" aria-label="Visualizaciones" hidden>
+      <figure id="chart-precios">
+        <figcaption>Precios por 1M de tokens: entrada (oscuro) y salida (gris). DeepSeek-R1 aparece capado y rotulado con sus valores reales.</figcaption>
+        <svg id="prices-svg" role="img" viewBox="0 0 560 44" preserveAspectRatio="xMidYMid meet"><title>Comparativa de precios por 1M de tokens</title></svg>
+        <p class="chart-empty" hidden>No hay datos de precios con los filtros actuales.</p>
+      </figure>
+      <figure id="chart-consumo">
+        <figcaption>Consumo total diario y semanal por modelo. Se resalta la barra del rango activo (Day/Week).</figcaption>
+        <svg id="usage-svg" role="img" viewBox="0 0 560 44" preserveAspectRatio="xMidYMid meet"><title>Consumo diario y semanal por modelo</title></svg>
+        <p class="chart-empty" hidden>No hay datos de consumo con los filtros actuales.</p>
+      </figure>
+    </section>
+
     <div class="table-wrap">
       <table id="models-table" hidden>
         <thead>
