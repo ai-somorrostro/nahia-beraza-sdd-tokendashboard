@@ -81,6 +81,27 @@
     <footer class="dashboard-footer">
       <p>Prices per 1M tokens. Cost = input tokens x input price + output tokens x output price. Serve over http (e.g. <code>python3 -m http.server</code>); <code>file://</code> is not supported.</p>
     </footer>
+
+    <aside id="detail" class="drawer" role="dialog" aria-modal="false" aria-labelledby="detail-title" hidden>
+      <div class="drawer-head">
+        <h2 id="detail-title">Model details</h2>
+        <button type="button" id="detail-close" aria-label="Close details">×</button>
+      </div>
+      <p id="detail-filter-note" class="status" hidden>This model is hidden by the current filters.</p>
+      <dl id="detail-metrics"></dl>
+      <figure id="detail-precios">
+        <figcaption>Precios por 1M de tokens: entrada y salida.</figcaption>
+        <svg id="detail-prices-svg" role="img" viewBox="0 0 340 80" preserveAspectRatio="xMidYMid meet"><title>Precios del modelo</title></svg>
+      </figure>
+      <figure id="detail-consumo">
+        <figcaption>Consumo total diario y semanal.</figcaption>
+        <svg id="detail-usage-svg" role="img" viewBox="0 0 340 80" preserveAspectRatio="xMidYMid meet"><title>Consumo del modelo</title></svg>
+      </figure>
+      <figure id="detail-reparto">
+        <figcaption>Reparto entrada/salida del rango activo.</figcaption>
+        <svg id="detail-split-svg" role="img" viewBox="0 0 340 44" preserveAspectRatio="xMidYMid meet"><title>Reparto entrada y salida</title></svg>
+      </figure>
+    </aside>
   </main>
   <script src="app.js"></script>
 </body>

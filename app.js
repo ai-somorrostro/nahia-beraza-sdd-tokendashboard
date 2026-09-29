@@ -8,6 +8,7 @@
     query: "",
     inMod: "all",
     outMod: "all",
+    selected: null, // model name or null
     models: []
   };
 
@@ -29,6 +30,15 @@
   var chartsSectionEl = document.getElementById("charts");
   var pricesSvg = document.getElementById("prices-svg");
   var usageSvg = document.getElementById("usage-svg");
+  var detailEl = document.getElementById("detail");
+  var detailTitleEl = document.getElementById("detail-title");
+  var detailCloseEl = document.getElementById("detail-close");
+  var detailFilterNoteEl = document.getElementById("detail-filter-note");
+  var detailMetricsEl = document.getElementById("detail-metrics");
+  var detailPricesSvg = document.getElementById("detail-prices-svg");
+  var detailUsageSvg = document.getElementById("detail-usage-svg");
+  var detailSplitSvg = document.getElementById("detail-split-svg");
+  var lastFocusedRow = null;
 
   function rangeSuffix() {
     return state.range === "day" ? "Day" : "Week";
@@ -196,6 +206,170 @@
     });
   }
 
+  function findModel(name) {
+    for (var i = 0; i < state.models.length; i++) {
+      if (state.models[i].name === name) {
+        return state.models[i];
+      }
+    }
+    return null;
+  }
+
+  function ttftStats() {
+    var values = state.models.map(function (m) { return m.ttft_ms; }).sort(function (a, b) { return a - b; });
+    if (values.length === 0) {
+      return { min: 0, max: 0, median: 0 };
+    }
+    var mid = Math.floor(values.length / 2);
+    var median = values.length % 2 === 1 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+    return { min: values[0], max: values[values.length - 1], median: median };
+  }
+
+  function addMetric(term, value) {
+    var dt = document.createElement("dt");
+    dt.textContent = term;
+    var dd = document.createElement("dd");
+    dd.textContent = value;
+    detailMetricsEl.appendChild(dt);
+    detailMetricsEl.appendChild(dd);
+  }
+
+  function renderDetail() {
+    var model = state.selected ? findModel(state.selected) : null;
+    if (!model) {
+      return;
+    }
+    var inPer1M = model.inputPricePerToken * 1000000;
+    var outPer1M = model.outputPricePerToken * 1000000;
+    var dayIn = model.inputTokensDay;
+    var dayOut = model.outputTokensDay;
+    var weekIn = model.inputTokensWeek;
+    var weekOut = model.outputTokensWeek;
+    var dayCost = dayIn * model.inputPricePerToken + dayOut * model.outputPricePerToken;
+    var weekCost = weekIn * model.inputPricePerToken + weekOut * model.outputPricePerToken;
+    var stats = ttftStats();
+
+    detailTitleEl.textContent = model.name;
+    while (detailMetricsEl.firstChild) {
+      detailMetricsEl.removeChild(detailMetricsEl.firstChild);
+    }
+    addMetric("Input modality", model.inputModality);
+    addMetric("Output modality", model.outputModality);
+    addMetric("Input price/token", "$" + model.inputPricePerToken);
+    addMetric("Output price/token", "$" + model.outputPricePerToken);
+    addMetric("Input price/1M", formatMoney(inPer1M));
+    addMetric("Output price/1M", formatMoney(outPer1M));
+    addMetric("TTFT", model.ttft_ms + " ms (min " + stats.min + ", max " + stats.max + ", median " + stats.median + ")");
+    addMetric("Day input tokens", formatTokens(dayIn));
+    addMetric("Day output tokens", formatTokens(dayOut));
+    addMetric("Day total/cost", formatTokens(dayIn + dayOut) + " / " + formatMoney(dayCost));
+    addMetric("Week input tokens", formatTokens(weekIn));
+    addMetric("Week output tokens", formatTokens(weekOut));
+    addMetric("Week total/cost", formatTokens(weekIn + weekOut) + " / " + formatMoney(weekCost));
+
+    var visible = applyFilters(state.models).some(function (m) { return m.name === model.name; });
+    detailFilterNoteEl.hidden = visible;
+
+    renderDetailPrices(model, inPer1M, outPer1M);
+    renderDetailUsage(model, dayIn + dayOut, weekIn + weekOut);
+    renderDetailSplit(model);
+  }
+
+  function renderDetailPrices(model, inPer1M, outPer1M) {
+    var svg = detailPricesSvg;
+    clearSvg(svg);
+    svg.setAttribute("viewBox", "0 0 340 64");
+    var trackX = 110;
+    var trackW = 140;
+    var inW = Math.min(inPer1M, PRICE_MAX) / PRICE_MAX * trackW;
+    svg.appendChild(svgEl("text", { x: 0, y: 16, "class": "chart-label" }, "In $/1M"));
+    svg.appendChild(svgEl("rect", {
+      x: trackX, y: 6, width: Math.max(inW, 2), height: 12,
+      "class": "bar-in" + (inPer1M > PRICE_MAX ? " capped" : "")
+    }));
+    svg.appendChild(svgEl("text", { x: trackX + Math.max(inW, 2) + 6, y: 16, "class": "chart-value" }, formatMoney(inPer1M)));
+    var outW = Math.min(outPer1M, PRICE_MAX) / PRICE_MAX * trackW;
+    svg.appendChild(svgEl("text", { x: 0, y: 44, "class": "chart-label" }, "Out $/1M"));
+    svg.appendChild(svgEl("rect", {
+      x: trackX, y: 34, width: Math.max(outW, 2), height: 12,
+      "class": "bar-out" + (outPer1M > PRICE_MAX ? " capped" : "")
+    }));
+    svg.appendChild(svgEl("text", { x: trackX + Math.max(outW, 2) + 6, y: 44, "class": "chart-value" }, formatMoney(outPer1M)));
+  }
+
+  function renderDetailUsage(model, dayTotal, weekTotal) {
+    var svg = detailUsageSvg;
+    clearSvg(svg);
+    svg.setAttribute("viewBox", "0 0 340 64");
+    var maxU = Math.max(dayTotal, weekTotal, 1);
+    var trackX = 110;
+    var trackW = 140;
+    var dayW = Math.max(dayTotal / maxU * trackW, 2);
+    svg.appendChild(svgEl("text", { x: 0, y: 16, "class": "chart-label" }, "Day"));
+    svg.appendChild(svgEl("rect", {
+      x: trackX, y: 6, width: dayW, height: 12,
+      "class": "bar-day" + (state.range === "day" ? " active" : " inactive")
+    }));
+    svg.appendChild(svgEl("text", { x: trackX + dayW + 6, y: 16, "class": "chart-value" }, formatTokens(dayTotal)));
+    var weekW = Math.max(weekTotal / maxU * trackW, 2);
+    svg.appendChild(svgEl("text", { x: 0, y: 44, "class": "chart-label" }, "Week"));
+    svg.appendChild(svgEl("rect", {
+      x: trackX, y: 34, width: weekW, height: 12,
+      "class": "bar-week" + (state.range === "week" ? " active" : " inactive")
+    }));
+    svg.appendChild(svgEl("text", { x: trackX + weekW + 6, y: 16 + 28, "class": "chart-value" }, formatTokens(weekTotal)));
+  }
+
+  function renderDetailSplit(model) {
+    var svg = detailSplitSvg;
+    clearSvg(svg);
+    svg.setAttribute("viewBox", "0 0 340 44");
+    var isDay = state.range === "day";
+    var input = isDay ? model.inputTokensDay : model.inputTokensWeek;
+    var output = isDay ? model.outputTokensDay : model.outputTokensWeek;
+    var total = Math.max(input + output, 1);
+    var barX = 8;
+    var barW = 324;
+    var inW = Math.max(input / total * barW, 2);
+    var outW = Math.max(barW - inW, 2);
+    svg.appendChild(svgEl("rect", { x: barX, y: 6, width: inW, height: 14, "class": "bar-in" }));
+    svg.appendChild(svgEl("rect", { x: barX + inW, y: 6, width: outW, height: 14, "class": "bar-out" }));
+    var inPct = Math.round(input / total * 100);
+    svg.appendChild(svgEl("text", { x: 8, y: 36, "class": "chart-value" }, "In " + inPct + "% (" + rangeSuffix() + ")"));
+    svg.appendChild(svgEl("text", { x: 200, y: 36, "class": "chart-value" }, "Out " + (100 - inPct) + "% (" + rangeSuffix() + ")"));
+  }
+
+  function openDetail(name, rowEl) {
+    var model = findModel(name);
+    if (!model) {
+      return;
+    }
+    state.selected = name;
+    lastFocusedRow = rowEl || null;
+    detailEl.hidden = false;
+    render();
+    detailCloseEl.focus();
+  }
+
+  function closeDetail() {
+    var name = state.selected;
+    state.selected = null;
+    detailEl.hidden = true;
+    render();
+    var target = null;
+    if (name) {
+      target = bodyEl.querySelector('tr[data-model="' + name + '"]');
+    }
+    if (target) {
+      target.focus();
+    } else if (lastFocusedRow && document.contains(lastFocusedRow)) {
+      lastFocusedRow.focus();
+    } else {
+      filterNameEl.focus();
+    }
+    lastFocusedRow = null;
+  }
+
   function cell(text, numeric) {
     var td = document.createElement("td");
     td.textContent = text;
@@ -222,6 +396,11 @@
     }
     rows.forEach(function (row) {
       var tr = document.createElement("tr");
+      tr.dataset.model = row.values.name;
+      tr.setAttribute("tabindex", "0");
+      if (state.selected === row.values.name) {
+        tr.setAttribute("aria-selected", "true");
+      }
       tr.appendChild(cell(row.values.name, false));
       tr.appendChild(cell(formatMoney(row.values.inPer1M), true));
       tr.appendChild(cell(formatMoney(row.values.outPer1M), true));
@@ -243,6 +422,9 @@
     emptyEl.hidden = rows.length !== 0;
     renderPrices(rows);
     renderUsage(rows);
+    if (!detailEl.hidden && state.selected) {
+      renderDetail();
+    }
 
     var label = rangeSuffix();
     tokensRangeLabel.textContent = label;
@@ -283,6 +465,7 @@
     statusEl.className = "status error";
     emptyEl.hidden = true;
     chartsSectionEl.hidden = true;
+    detailEl.hidden = true;
     tableEl.hidden = true;
     totalsRow.hidden = true;
   }
@@ -333,6 +516,34 @@
   var sortButtons = tableEl.querySelectorAll("thead button[data-sort]");
   sortButtons.forEach(function (button) {
     button.addEventListener("click", onSortButtonClick);
+  });
+
+  bodyEl.addEventListener("click", function (event) {
+    var tr = event.target.closest("tr");
+    if (!tr || !tr.dataset.model) {
+      return;
+    }
+    openDetail(tr.dataset.model, tr);
+  });
+
+  bodyEl.addEventListener("keydown", function (event) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    var tr = event.target.closest("tr");
+    if (!tr || !tr.dataset.model) {
+      return;
+    }
+    event.preventDefault();
+    openDetail(tr.dataset.model, tr);
+  });
+
+  detailCloseEl.addEventListener("click", function () { closeDetail(); });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !detailEl.hidden) {
+      closeDetail();
+    }
   });
 
   fetch("mock-data.json")
