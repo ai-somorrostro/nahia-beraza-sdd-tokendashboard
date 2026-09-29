@@ -5,6 +5,9 @@
     range: "day", // 'day' | 'week'
     sortKey: null, // null = file order
     sortDir: 1, // 1 = ascending, -1 = descending
+    query: "",
+    inMod: "all",
+    outMod: "all",
     models: []
   };
 
@@ -18,6 +21,11 @@
   var weekBtn = document.getElementById("range-week");
   var tokensRangeLabel = document.getElementById("tokens-range-label");
   var costRangeLabel = document.getElementById("cost-range-label");
+  var filterNameEl = document.getElementById("filter-name");
+  var filterInmodEl = document.getElementById("filter-inmod");
+  var filterOutmodEl = document.getElementById("filter-outmod");
+  var filtersClearEl = document.getElementById("filters-clear");
+  var emptyEl = document.getElementById("empty");
 
   function rangeSuffix() {
     return state.range === "day" ? "Day" : "Week";
@@ -80,6 +88,22 @@
     modality: function (a, b) { return a.modality.localeCompare(b.modality); }
   };
 
+  function applyFilters(models) {
+    var q = state.query.trim().toLowerCase();
+    return models.filter(function (model) {
+      if (q && model.name.toLowerCase().indexOf(q) === -1) {
+        return false;
+      }
+      if (state.inMod !== "all" && model.inputModality !== state.inMod) {
+        return false;
+      }
+      if (state.outMod !== "all" && model.outputModality !== state.outMod) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   function cell(text, numeric) {
     var td = document.createElement("td");
     td.textContent = text;
@@ -90,7 +114,8 @@
   }
 
   function render() {
-    var rows = state.models.map(function (model) {
+    var visible = applyFilters(state.models);
+    var rows = visible.map(function (model) {
       return { model: model, values: rowValues(model) };
     });
 
@@ -117,12 +142,13 @@
 
     var totalTokens = 0;
     var totalCost = 0;
-    state.models.forEach(function (model) {
+    visible.forEach(function (model) {
       totalTokens += tokensFor(model);
       totalCost += costFor(model);
     });
     totalsTokensEl.textContent = formatTokens(totalTokens);
     totalsCostEl.textContent = formatMoney(totalCost);
+    emptyEl.hidden = rows.length !== 0;
 
     var label = rangeSuffix();
     tokensRangeLabel.textContent = label;
@@ -148,13 +174,19 @@
   function showTable() {
     statusEl.textContent = "";
     statusEl.className = "status";
+    emptyEl.hidden = true;
     tableEl.hidden = false;
     totalsRow.hidden = false;
+  }
+
+  function showEmpty() {
+    emptyEl.hidden = false;
   }
 
   function showError(message) {
     statusEl.textContent = message;
     statusEl.className = "status error";
+    emptyEl.hidden = true;
     tableEl.hidden = true;
     totalsRow.hidden = true;
   }
@@ -179,6 +211,28 @@
 
   dayBtn.addEventListener("click", function () { setRange("day"); });
   weekBtn.addEventListener("click", function () { setRange("week"); });
+
+  filterNameEl.addEventListener("input", function () {
+    state.query = filterNameEl.value;
+    render();
+  });
+  filterInmodEl.addEventListener("change", function () {
+    state.inMod = filterInmodEl.value;
+    render();
+  });
+  filterOutmodEl.addEventListener("change", function () {
+    state.outMod = filterOutmodEl.value;
+    render();
+  });
+  filtersClearEl.addEventListener("click", function () {
+    state.query = "";
+    state.inMod = "all";
+    state.outMod = "all";
+    filterNameEl.value = "";
+    filterInmodEl.value = "all";
+    filterOutmodEl.value = "all";
+    render();
+  });
 
   var sortButtons = tableEl.querySelectorAll("thead button[data-sort]");
   sortButtons.forEach(function (button) {

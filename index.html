@@ -16,7 +16,26 @@
       </div>
     </header>
 
+    <div class="filters" aria-controls="models-table">
+      <label>Search <input type="search" id="filter-name" placeholder="Filter by model…" autocomplete="off"></label>
+      <label>Input modality
+        <select id="filter-inmod">
+          <option value="all">All</option>
+          <option value="Text">Text</option>
+          <option value="Text+Image">Text+Image</option>
+        </select>
+      </label>
+      <label>Output modality
+        <select id="filter-outmod">
+          <option value="all">All</option>
+          <option value="Text">Text</option>
+        </select>
+      </label>
+      <button type="button" id="filters-clear">Clear</button>
+    </div>
+
     <p id="status" class="status" role="status">Loading model data…</p>
+    <p id="empty" class="status" role="status" hidden>No models match the current filters.</p>
 
     <div class="table-wrap">
       <table id="models-table" hidden>
