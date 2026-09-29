@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Llama 3.3 70B",
+    "inputPricePerToken": 0.00000023,
+    "outputPricePerToken": 0.00000040,
+    "ttft_ms": 320,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 4200000,
+    "outputTokensDay": 1100000,
+    "inputTokensWeek": 29000000,
+    "outputTokensWeek": 7600000
+  },
+  {
+    "name": "Qwen3 32B",
+    "inputPricePerToken": 0.00000018,
+    "outputPricePerToken": 0.00000032,
+    "ttft_ms": 280,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 3100000,
+    "outputTokensDay": 890000,
+    "inputTokensWeek": 21500000,
+    "outputTokensWeek": 6200000
+  },
+  {
+    "name": "DeepSeek-V3",
+    "inputPricePerToken": 0.00000014,
+    "outputPricePerToken": 0.00000028,
+    "ttft_ms": 410,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 5600000,
+    "outputTokensDay": 1450000,
+    "inputTokensWeek": 38900000,
+    "outputTokensWeek": 10100000
+  },
+  {
+    "name": "DeepSeek-R1",
+    "inputPricePerToken": 0.00000055,
+    "outputPricePerToken": 0.00000219,
+    "ttft_ms": 890,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 2800000,
+    "outputTokensDay": 2100000,
+    "inputTokensWeek": 19400000,
+    "outputTokensWeek": 14600000
+  },
+  {
+    "name": "Mistral Small 3.1",
+    "inputPricePerToken": 0.00000010,
+    "outputPricePerToken": 0.00000030,
+    "ttft_ms": 240,
+    "inputModality": "Text+Image",
+    "outputModality": "Text",
+    "inputTokensDay": 1900000,
+    "outputTokensDay": 620000,
+    "inputTokensWeek": 13200000,
+    "outputTokensWeek": 4300000
+  },
+  {
+    "name": "Gemma 3 27B",
+    "inputPricePerToken": 0.00000011,
+    "outputPricePerToken": 0.00000019,
+    "ttft_ms": 260,
+    "inputModality": "Text+Image",
+    "outputModality": "Text",
+    "inputTokensDay": 2400000,
+    "outputTokensDay": 710000,
+    "inputTokensWeek": 16700000,
+    "outputTokensWeek": 4900000
+  },
+  {
+    "name": "Phi-4",
+    "inputPricePerToken": 0.00000007,
+    "outputPricePerToken": 0.00000014,
+    "ttft_ms": 190,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 980000,
+    "outputTokensDay": 310000,
+    "inputTokensWeek": 6800000,
+    "outputTokensWeek": 2150000
+  },
+  {
+    "name": "GLM-4.5",
+    "inputPricePerToken": 0.00000021,
+    "outputPricePerToken": 0.00000038,
+    "ttft_ms": 350,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 3400000,
+    "outputTokensDay": 970000,
+    "inputTokensWeek": 23600000,
+    "outputTokensWeek": 6750000
+  },
+  {
+    "name": "Kimi K2",
+    "inputPricePerToken": 0.00000024,
+    "outputPricePerToken": 0.00000041,
+    "ttft_ms": 300,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 1700000,
+    "outputTokensDay": 480000,
+    "inputTokensWeek": 11900000,
+    "outputTokensWeek": 3350000
+  },
+  {
+    "name": "GPT-OSS 120B",
+    "inputPricePerToken": 0.00000030,
+    "outputPricePerToken": 0.00000060,
+    "ttft_ms": 380,
+    "inputModality": "Text",
+    "outputModality": "Text",
+    "inputTokensDay": 4900000,
+    "outputTokensDay": 1350000,
+    "inputTokensWeek": 34200000,
+    "outputTokensWeek": 9450000
+  }
+]

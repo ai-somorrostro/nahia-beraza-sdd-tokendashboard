@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f4f5f7;
+  color: #1c1e21;
+}
+
+.dashboard {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.range-toggle {
+  display: inline-flex;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.range-toggle button {
+  border: 0;
+  background: #fff;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.range-toggle button + button {
+  border-left: 1px solid #ccd0d5;
+}
+
+.range-toggle button[aria-pressed="true"] {
+  background: #1c1e21;
+  color: #fff;
+}
+
+.status {
+  margin: 16px 0;
+  color: #606770;
+}
+
+.status.error {
+  color: #b3261e;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #dddfe2;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e4e6eb;
+  white-space: nowrap;
+}
+
+thead th {
+  background: #f0f2f5;
+}
+
+thead th button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+thead th button:hover {
+  text-decoration: underline;
+}
+
+.sort-ind::after {
+  content: "";
+}
+
+th[aria-sort="ascending"] .sort-ind::after {
+  content: "▲";
+}
+
+th[aria-sort="descending"] .sort-ind::after {
+  content: "▼";
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+tfoot th,
+tfoot td {
+  font-weight: 700;
+  border-bottom: 0;
+  background: #f0f2f5;
+}
+
+.dashboard-footer {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: #606770;
+}
+
+.dashboard-footer code {
+  background: #e4e6eb;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
