@@ -52,6 +52,41 @@ body {
   color: #fff;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.filters label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #606770;
+}
+
+.filters input,
+.filters select {
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #1c1e21;
+}
+
+.filters button {
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 .status {
   margin: 16px 0;
   color: #606770;
