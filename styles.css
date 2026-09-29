@@ -87,6 +87,70 @@ body {
   cursor: pointer;
 }
 
+.charts,
+#charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+#charts figure {
+  margin: 0;
+  background: #fff;
+  border: 1px solid #dddfe2;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+#charts figcaption {
+  font-size: 0.8rem;
+  color: #606770;
+  margin-bottom: 8px;
+}
+
+#charts svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: inherit;
+}
+
+#charts svg text {
+  font-size: 11px;
+  fill: #606770;
+}
+
+#charts svg text.chart-value {
+  fill: #1c1e21;
+}
+
+#charts svg rect.bar-in,
+#charts svg rect.bar-day.active {
+  fill: #1c1e21;
+}
+
+#charts svg rect.bar-out,
+#charts svg rect.bar-week.active {
+  fill: #6b7686;
+}
+
+#charts svg rect.inactive {
+  opacity: 0.35;
+}
+
+#charts svg rect.capped {
+  stroke: #b3261e;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+}
+
+#charts .chart-empty {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #606770;
+}
+
 .status {
   margin: 16px 0;
   color: #606770;
