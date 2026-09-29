@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="dashboard">
+    <header class="dashboard-header">
+      <h1>Token Dashboard</h1>
+      <div class="range-toggle" role="group" aria-label="Usage range">
+        <button type="button" id="range-day" aria-pressed="true">Day</button>
+        <button type="button" id="range-week" aria-pressed="false">Week</button>
+      </div>
+    </header>
+
+    <p id="status" class="status" role="status">Loading model data…</p>
+
+    <div class="table-wrap">
+      <table id="models-table" hidden>
+        <thead>
+          <tr>
+            <th scope="col" aria-sort="none"><button type="button" data-sort="name">Model <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none" class="num"><button type="button" data-sort="inPer1M">In $/1M <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none" class="num"><button type="button" data-sort="outPer1M">Out $/1M <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none" class="num"><button type="button" data-sort="ttft">TTFT (ms) <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none" class="num"><button type="button" data-sort="tokens">Tokens (<span id="tokens-range-label">Day</span>) <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none" class="num"><button type="button" data-sort="cost">Cost (<span id="cost-range-label">Day</span>) <span class="sort-ind" aria-hidden="true"></span></button></th>
+            <th scope="col" aria-sort="none"><button type="button" data-sort="modality">Modality <span class="sort-ind" aria-hidden="true"></span></button></th>
+          </tr>
+        </thead>
+        <tbody id="models-body"></tbody>
+        <tfoot>
+          <tr id="totals-row" hidden>
+            <th scope="row">Total</th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td id="totals-tokens" class="num"></td>
+            <td id="totals-cost" class="num"></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <footer class="dashboard-footer">
+      <p>Prices per 1M tokens. Cost = input tokens x input price + output tokens x output price. Serve over http (e.g. <code>python3 -m http.server</code>); <code>file://</code> is not supported.</p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
